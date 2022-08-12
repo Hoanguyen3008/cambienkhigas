@@ -1,0 +1,67 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
+
+#define WIFI_SSID "HSU_Students"    // kết nối với mật khẩu wifi của mình 
+#define WIFI_PASSWORD "dhhs12cnvch"
+
+#define FIREBASE_HOST "cam-bien-khi-ga-default-rtdb.firebaseio.com/" // kết nối firebase bỏ phần http
+#define FIREBASE_AUTH "VIEbtcHHnfkMMaVYZiduydGekeK1NlpLqjhIgkzM"
+
+FirebaseData firebaseData;
+//WiFiClient client;
+String path ="/";
+FirebaseJson json;
+
+int buzzer = D2;
+int smokeA0 = A0;
+
+// Your threshold value. You might need to change it.
+int sensorThres = 600;
+
+void setup() {
+ pinMode(buzzer, OUTPUT);
+ pinMode(smokeA0, INPUT);
+ Serial.begin(9600);
+
+ WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
+ while(WiFi.status() != WL_CONNECTED)
+ {
+  delay(500);
+  Serial.print(".");
+ }
+ 
+ Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+ Firebase.reconnectWiFi(true);
+ if(!Firebase.beginStream(firebaseData,path))
+ {
+  Serial.println("REASON"+firebaseData.errorReason());
+  Serial.println();
+ }
+ Serial.print("Connected with IP: ");
+ Serial.println(WiFi.localIP());
+ Serial.println();
+}
+
+void loop() {
+  
+ int analogSensor = analogRead(smokeA0);
+ Serial.print("Nong do khi gas: ");
+ Serial.println(analogSensor);
+ // Checks if it has reached the threshold value
+ if (analogSensor > sensorThres)
+ {
+    Serial.print("khi gas cao: ");
+   tone(buzzer, 1000, 200);
+ }
+ else
+ {
+   Serial.print("khi gas thap: ");
+   noTone(buzzer);
+ }
+ delay(1000);
+
+ //Firebase.setInt(firebaseData, path + "/khoi",analogSensor);
+ Firebase.pushString(firebaseData, path + "/khoi",analogSensor);
+ 
+}
