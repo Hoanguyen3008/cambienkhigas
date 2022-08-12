@@ -51,17 +51,17 @@ void loop() {
  // Checks if it has reached the threshold value
  if (analogSensor > sensorThres)
  {
-    Serial.print("khi gas cao: ");
+    Serial.print("khi gas cao!!! ");
    tone(buzzer, 1000, 200);
  }
  else
  {
-   Serial.print("khi gas thap: ");
+   Serial.print("khi gas thap... ");
    noTone(buzzer);
  }
  delay(1000);
 
- //Firebase.setInt(firebaseData, path + "/khoi",analogSensor);
- Firebase.pushString(firebaseData, path + "/khoi",analogSensor);
+ //Firebase.setInt(firebaseData, path + "/khi gas",analogSensor);
+ Firebase.pushString(firebaseData, path + "/khi gas",analogSensor);
  
 }
