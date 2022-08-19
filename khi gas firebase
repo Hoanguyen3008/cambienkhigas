@@ -1,0 +1,53 @@
+#include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
+
+#define WIFI_SSID "HSU_Students"    // chọn wifi cần dùng để kết nối 
+#define WIFI_PASSWORD "dhhs12cnvch"      // nhập mật khẩu wifi đã chọn
+
+#define FIREBASE_HOST "cam-bien-khi-ga-default-rtdb.firebaseio.com/" // kết nối firebase bỏ phần http
+#define FIREBASE_AUTH "VIEbtcHHnfkMMaVYZiduydGekeK1NlpLqjhIgkzM"
+
+FirebaseData firebaseData;
+//WiFiClient client;
+String path ="/";
+FirebaseJson json;
+
+int cambien = A0; //Cảm biến nối chân A0 Arduino
+int giatri;
+
+void setup() 
+{
+  Serial.begin(9600);
+  pinMode(cambien, INPUT); //Cảm biến nhận tín hiệu
+
+  WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
+ while(WiFi.status() != WL_CONNECTED)
+ {
+  delay(500);
+  Serial.print(".");
+ }
+ 
+ Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+ Firebase.reconnectWiFi(true);
+ if(!Firebase.beginStream(firebaseData,path))
+ {
+  Serial.println("REASON"+firebaseData.errorReason());
+  Serial.println();
+ }
+ Serial.print("Connected with IP: ");
+ Serial.println(WiFi.localIP());
+ Serial.println();
+
+}
+
+void loop() 
+{
+  giatri = analogRead(cambien); //Đọc giá trị cảm biến và gán vào biến giatri
+  Serial.print("Giá trị cảm biến: ");
+  Serial.println(giatri);
+  delay(500);
+
+//Firebase.setInt(firebaseData, path + "/khi gas",analogSensor);
+  Firebase.pushString(firebaseData, path + "/gia tri cam bien ",giatri);
+}
